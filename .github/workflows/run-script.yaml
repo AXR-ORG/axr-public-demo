@@ -1,0 +1,41 @@
+name: Run Unit Testing
+
+on:
+  pull_request:
+    types: [opened, reopened]
+    branches:
+      - 'feat/**'    
+
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10"] # can specify list of python versions to use
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          npm install -g aws-cdk
+          npm update
+          python3 -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then python3 -m pip install -r requirements.txt; fi
+      - name: Configure AWS Credentials # need to configure IAM credentials in github
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ap-southeast-1
+      - name: CDK synth and deploy
+        run: |
+          cdk synth
+          cdk deploy AxrBackendCdkStack AxrDynamoDBCdkStack --require-approval never
+          # cdk destroy AalDemoBackendCdkStack --force
