@@ -11,29 +11,30 @@ DYNAMODB_RESOURCE = boto3.resource('dynamodb')
 TEST_DDB_TABLE = DYNAMODB_RESOURCE.Table(TEST_TABLE_NAME)
 
 def lambda_handler(event, context):
-    myTableId = event.get('myTableId')
+    testTableId = event.get('testTableId')
 
-    tableRecord = getTableRecord(myTableId)
+    tableRecord = getTableRecord(testTableId)
 
-    if not response:
+    if not tableRecord:
         #create a new record
-        createTableRecord(myTableId)
+        createTableRecord(testTableId)
 
     else:
         #update the existing record
-        updateTableRecord(myTableId)
+        updateTableRecord(testTableId)
 
 
-def getTableRecord(myTableId):
-    response = TEST_DDB_TABLE.get_item(Key={'myTableId': myTableId}).get('Item')
+def getTableRecord(testTableId):
+    response = TEST_DDB_TABLE.get_item(Key={'testTableId': testTableId}).get('Item')
     return response
 
-def createTableRecord(myTableId):
-    TEST_DDB_TABLE.put_item(Item={'myTableId': myTableId, 'myTableValue': 'myTableValue'})
+def createTableRecord(testTableId):
+    TEST_DDB_TABLE.put_item(Item={'testTableId': testTableId, 'myTableValue': 'myTableValue'})
+    print("here")
 
-def updateTableRecord(myTableId):
+def updateTableRecord(testTableId):
     TEST_DDB_TABLE.update_item(
-        Key={'myTableId': myTableId},
+        Key={'testTableId': testTableId},
         UpdateExpression='SET myTableValue = :myTableValue',
         ExpressionAttributeValues={':myTableValue': 'myTableValue'}
     )
