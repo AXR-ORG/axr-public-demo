@@ -12,6 +12,7 @@ TEST_DDB_TABLE = DYNAMODB_RESOURCE.Table(TEST_TABLE_NAME)
 
 def lambda_handler(event, context):
     testTableId = event.get('testTableId')
+    mode = event.get('mode')
 
     tableRecord = getTableRecord(testTableId)
 
@@ -19,6 +20,10 @@ def lambda_handler(event, context):
         #create a new record
         createTableRecord(testTableId)
 
+    elif mode == "delete":
+        #delete the existing record
+        deleteTableRecord(testTableId)
+    
     else:
         #update the existing record
         updateTableRecord(testTableId)
@@ -30,7 +35,6 @@ def getTableRecord(testTableId):
 
 def createTableRecord(testTableId):
     TEST_DDB_TABLE.put_item(Item={'testTableId': testTableId, 'myTableValue': 'myTableValue'})
-    print("here")
 
 def updateTableRecord(testTableId):
     TEST_DDB_TABLE.update_item(
@@ -38,3 +42,7 @@ def updateTableRecord(testTableId):
         UpdateExpression='SET myTableValue = :myTableValue',
         ExpressionAttributeValues={':myTableValue': 'myTableValue'}
     )
+
+
+def deleteTableRecord(testTableId):
+    TEST_DDB_TABLE.delete_item(Key={'testTableId': testTableId})
